@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import pytz
 from keras.models import load_model
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
@@ -26,9 +27,13 @@ stock_name = st.text_input("Enter Stock name", "AAPL")
 # stock_name = "AAPL"
 att_name = st.text_input("Enter the attribute to predict", "Close")
 # att_name = "Close"
+epochs = st.number_input("Optional: Specify no. of Epochs", 10)
 
 
-end = datetime.now()
+tz = pytz.timezone("America/New_York")
+end = tz.localize(datetime.today())
+# start = tz.localize(dt(2013,1,1))
+# end = datetime.now()
 start = datetime(end.year-5, end.month, end.day)
 
 
@@ -50,8 +55,10 @@ scaled_data = scaler.fit_transform(stock_data_att)
 X_data = []
 y_data = []
 
-for i in range(100, len(scaled_data)):
-    X_data.append(scaled_data[i-100:i])
+past_mem = 100
+
+for i in range(past_mem, len(scaled_data)):
+    X_data.append(scaled_data[i-past_mem:i])
     y_data.append(scaled_data[i])
 
 X_data = np.array(X_data)
@@ -71,7 +78,7 @@ print(y_train.shape)
 print(y_test.shape)
 
 model = load_model("Stock_prediction_Model_2.keras")
-model.fit(X_train, y_train, batch_size=64, epochs=10)
+model.fit(X_train, y_train, batch_size=64, epochs=epochs)
 
 predictions = model.predict(y_test)
 inv_pred = scaler.inverse_transform(predictions)
@@ -84,10 +91,10 @@ print(res)
 data_plot = pd.DataFrame({
 'original_test_data': inv_y.reshape(-1),
 'predicted_test_data': inv_pred.reshape(-1)
-}, index=stock_data.index[split_len + 100:])
+}, index=stock_data.index[split_len + past_mem:])
 
 # data_plot.head()
 
 st.pyplot(plot_graph((15, 5), data_plot, "Predictions"))
 
-st.pyplot(plot_graph((15, 5), pd.concat([ stock_data_att[:split_len+100], data_plot], axis=0), "Total"))
+st.pyplot(plot_graph((15, 5), pd.concat([ stock_data_att[:split_len+past_mem], data_plot], axis=0), "Total"))
