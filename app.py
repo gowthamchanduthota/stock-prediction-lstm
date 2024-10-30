@@ -93,6 +93,8 @@ except Exception as e:
 model.fit(X_train, y_train, batch_size=64, epochs=epochs)
 
 predictions = model.predict(y_test)
+print("Printing predictions....")
+print(predictions)
 inv_pred = scaler.inverse_transform(predictions)
 inv_y = scaler.inverse_transform(y_test)
 
@@ -105,7 +107,7 @@ data_plot = pd.DataFrame({
 'predicted_test_data': inv_pred.reshape(-1)
 }, index=stock_data.index[split_len + past_mem:])
 
-# data_plot.head()
+print(data_plot.head())
 
 st.pyplot(plot_graph((15, 5), data_plot, "Predictions"))
 
