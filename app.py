@@ -81,23 +81,23 @@ print(y_test.shape)
 
 model = None
 try:
-    model = load_model("./Stock_prediction_Model_2.keras")
+    model = load_model("./Stock_prediction_Modell_2.keras")
 except Exception as e:
     print("Model file not found")
     model = Sequential()
-    model.add(LSTM(50, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2])))
-    model.add(LSTM(50, return_sequences=True))
-    model.add(LSTM(50))
+    model.add(LSTM(128, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2])))
+    model.add(LSTM(64, return_sequences=False))
+    model.add(Dense(25))
     model.add(Dense(1))
     model.compile(optimizer='adam', loss='mean_squared_error')
 model.fit(X_train, y_train, batch_size=64, epochs=epochs)
 
-predictions = model.predict(y_test)
+predictions = model.predict(X_test)
 print("Printing predictions....")
-print(predictions)
+
 inv_pred = scaler.inverse_transform(predictions)
 inv_y = scaler.inverse_transform(y_test)
-
+print(inv_pred)
 res = math.sqrt(mean_squared_error(inv_y, inv_pred))
 print(res)
 
