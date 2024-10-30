@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import pytz
 from keras.models import load_model
+from keras.models import Sequential
+from keras.layers import LSTM, Dense
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import yfinance as yf
@@ -77,7 +79,17 @@ print(X_test.shape)
 print(y_train.shape)
 print(y_test.shape)
 
-model = load_model("Stock_prediction_Model_2.keras")
+model = None
+try:
+    model = load_model("./Stock_prediction_Model_2.keras")
+except Exception as e:
+    print("Model file not found")
+    model1 = Sequential()
+    model1.add(LSTM(50, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2])))
+    model1.add(LSTM(50, return_sequences=True))
+    model1.add(LSTM(50))
+    model1.add(Dense(1))
+    model1.compile(optimizer='adam', loss='mean_squared_error')
 model.fit(X_train, y_train, batch_size=64, epochs=epochs)
 
 predictions = model.predict(y_test)
